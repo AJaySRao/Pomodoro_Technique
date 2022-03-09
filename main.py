@@ -1,5 +1,6 @@
 from tkinter import *
 import math as m
+import pygame
 
 # ---------------------------- CONSTANTS ------------------------------- #
 PINK = "#e2979c"
@@ -13,7 +14,22 @@ LONG_BREAK_MIN = 20
 rep = 0
 clock = None
 
+# ------------------------------ AUDIO --------------------------------- #
+pygame.init()
+
+
+def play():
+    pygame.mixer.music.load("clock-ticking.mp3")  # Loading File Into Mixer
+    pygame.mixer.music.play(1500)  # loops for 25min
+
+
+def play_break():
+    pygame.mixer.music.load("clock.mp3")  # Loading File Into Mixer
+    pygame.mixer.music.play()
+
 # ---------------------------- TIMER RESET ------------------------------- # 
+
+
 def re_set():
     global rep
     window.after_cancel(clock)
@@ -21,14 +37,14 @@ def re_set():
     canvas.itemconfig(time_text, text=f'00:00')
     done.config(text='')
     rep = 0
-
-
-
+    pygame.mixer.music.stop()
 
 # ---------------------------- TIMER MECHANISM ------------------------------- #
 
+
 def set_timer():
     global rep
+    global p
     rep += 1
     work_sec = WORK_MIN * 60
     sh_sec = SHORT_BREAK_MIN * 60
@@ -37,17 +53,24 @@ def set_timer():
     if rep % 8 == 0:
         count_down(lg_sec)
         timer.config(text='Break', fg=RED)
+        play_break()
     elif rep % 2 == 0:
         count_down(sh_sec)
         timer.config(text='Break', fg=PINK)
+        play_break()
     else:
         count_down(work_sec)
         timer.config(text='Work', fg=GREEN)
+        play()
+
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- # 
+
 
 def count_down(count):
     global clock
     mint = m.floor(count / 60)
+    if mint < 10:
+        mint = f'0{mint}'
     sec = count % 60
     if sec < 10:
         sec = f'0{sec}'
@@ -62,7 +85,6 @@ def count_down(count):
             mark += '✅'
         done.config(text=mark)
 # ---------------------------- UI SETUP ------------------------------- #
-
 window = Tk()
 window.title("Pomodoro Technique")
 window.config(padx=100, pady=60, bg=YELLOW)
